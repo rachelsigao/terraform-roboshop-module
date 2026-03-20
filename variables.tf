@@ -7,11 +7,11 @@ variable "environment" {
 }
 
 variable "zone_id" {
-    default = "Z032558618100M4EJX8X4"
+    default = "Z03171147RXIT58UUGL6"
 }
 
 variable "zone_name" {
-    default = "daws84s.site"
+    default = "rachelsigao.online"
 }
 
 variable "component" {

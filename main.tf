@@ -1,3 +1,4 @@
+# Creating Target group for ALB
 resource "aws_lb_target_group" "main" {
   name     = "${var.project}-${var.environment}-${var.component}" #roboshop-dev-${var.component}
   port     = local.tg_port
@@ -15,6 +16,7 @@ resource "aws_lb_target_group" "main" {
   }
 }
 
+# Creating the EC2 instance.
 resource "aws_instance" "main" {
   ami           = local.ami_id
   instance_type = "t3.micro"
@@ -29,6 +31,7 @@ resource "aws_instance" "main" {
   )
 }
 
+# Installing application on the EC2 instance.
 resource "terraform_data" "main" {
   triggers_replace = [
     aws_instance.main.id
@@ -54,12 +57,14 @@ resource "terraform_data" "main" {
   }
 }
 
+# Stopping the EC2 instance to create AMI.
 resource "aws_ec2_instance_state" "main" {
   instance_id = aws_instance.main.id
   state       = "stopped"
   depends_on = [terraform_data.main]
 }
 
+# Creating AMI from the EC2 instance.
 resource "aws_ami_from_instance" "main" {
   name               = "${var.project}-${var.environment}-${var.component}"
   source_instance_id = aws_instance.main.id
@@ -72,6 +77,7 @@ resource "aws_ami_from_instance" "main" {
   )
 }
 
+# Terminating the EC2 instance after creating the AMI.
 resource "terraform_data" "main_delete" {
   triggers_replace = [
     aws_instance.main.id
@@ -85,6 +91,7 @@ resource "terraform_data" "main_delete" {
   depends_on = [aws_ami_from_instance.main]
 }
 
+# Creating the launch template for Auto Scaling group
 resource "aws_launch_template" "main" {
   name = "${var.project}-${var.environment}-${var.component}"
 
@@ -126,6 +133,7 @@ resource "aws_launch_template" "main" {
 
 }
 
+# Automatically update Launch template when a new AMI is created.
 resource "aws_autoscaling_group" "main" {
   name                 = "${var.project}-${var.environment}-${var.component}"
   desired_capacity   = 1
@@ -169,6 +177,7 @@ resource "aws_autoscaling_group" "main" {
   }
 }
 
+# Creating the Auto Scaling policy to automatically scale the EC2 instances based on the CPU utilization.
 resource "aws_autoscaling_policy" "main" {
   name                   = "${var.project}-${var.environment}-${var.component}"
   autoscaling_group_name = aws_autoscaling_group.main.name
@@ -182,6 +191,7 @@ resource "aws_autoscaling_policy" "main" {
   }
 }
 
+# Creating the ALB listener rule to route traffic to the target group based on the host header.
 resource "aws_lb_listener_rule" "main" {
   listener_arn = local.alb_listener_arn
   priority     = var.rule_priority
