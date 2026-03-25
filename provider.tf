@@ -6,13 +6,8 @@ terraform {
     }
   }
 
-  backend "s3" {
-    bucket = "rachel-remote-tfstate"
-    key    = "terraform-roboshop-module"
-    region = "us-east-1"
-    encrypt        = true
-    use_lockfile = true
-  }
+  # Backend configuration is only used in root module not child module.
+
 }
 
 # provider "aws" {

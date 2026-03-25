@@ -12,7 +12,7 @@ locals {
 
     alb_listener_arn = "${var.component}" == "frontend" ? local.frontend_alb_listener_arn : local.backend_alb_listener_arn
 
-    tg_port = "${var.component}" == "frontend" ? 80 : 8080
+    tg_port = "${var.component}" == "frontend" ? 80 : 8080 # Frontend ALB will forward the traffic to EC2 instances on port 80. Backend ALB on port 8080.
     health_check_path = "${var.component}" == "frontend" ? "/" : "/health"
 
     rule_header_url = "${var.component}" == "frontend" ? "${var.environment}.${var.zone_name}" : "${var.component}.backend-${var.environment}.${var.zone_name}"
